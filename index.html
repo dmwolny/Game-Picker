@@ -639,10 +639,8 @@ function onLanded(targetIndex, gameName, spinItems, finalIndex) {
   document.getElementById('spinBtn').disabled = false;
 
   if (credits <= 0) {
-    setTimeout(() => {
       credits = 4;
       updateCredits();
-    }, 2000);
   }
 }
 
