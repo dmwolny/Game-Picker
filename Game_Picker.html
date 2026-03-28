@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAME PICKER 9000</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-pink: #ff2d78;
+    --neon-cyan: #00f5ff;
+    --neon-yellow: #ffe600;
+    --neon-green: #39ff14;
+    --neon-purple: #bf5fff;
+    --dark: #080810;
+    --dark2: #0e0e1a;
+    --dark3: #141428;
+    --glow-pink: 0 0 8px #ff2d78, 0 0 20px #ff2d7855;
+    --glow-cyan: 0 0 8px #00f5ff, 0 0 20px #00f5ff55;
+    --glow-yellow: 0 0 8px #ffe600, 0 0 20px #ffe60055;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Grid background */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  /* TITLE */
+  .title-block {
+    text-align: center;
+  }
+
+  .title-top {
+    font-size: 9px;
+    color: var(--neon-cyan);
+    letter-spacing: 6px;
+    text-shadow: var(--glow-cyan);
+    margin-bottom: 8px;
+  }
+
+  .title-main {
+    font-size: clamp(18px, 5vw, 28px);
+    color: var(--neon-yellow);
+    text-shadow: var(--glow-yellow);
+    line-height: 1.4;
+    animation: flicker 4s infinite;
+  }
+
+  @keyframes flicker {
+    0%,95%,100%{opacity:1}
+    96%{opacity:.7}
+    97%{opacity:1}
+    98%{opacity:.5}
+    99%{opacity:1}
+  }
+
+  .title-sub {
+    font-size: 7px;
+    color: var(--neon-pink);
+    letter-spacing: 3px;
+    margin-top: 10px;
+    text-shadow: var(--glow-pink);
+  }
+
+  /* SLOT MACHINE CABINET */
+  .cabinet {
+    width: 100%;
+    background: linear-gradient(160deg, #1a1a32 0%, #0e0e1e 60%, #151528 100%);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 16px;
+    box-shadow:
+      0 0 0 1px rgba(0,245,255,0.2),
+      0 0 30px rgba(0,245,255,0.15),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+    padding: 24px 20px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cabinet::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), var(--neon-pink), transparent);
+    animation: topbar 3s linear infinite;
+  }
+
+  @keyframes topbar {
+    0%{background-position:0%}
+    100%{background-position:200%}
+  }
+
+  .cabinet-label {
+    text-align: center;
+    font-size: 7px;
+    color: rgba(0,245,255,0.5);
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+  }
+
+  /* REEL WINDOW */
+  .reel-window {
+    background: #04040c;
+    border: 2px solid rgba(0,245,255,0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    height: 200px;
+    position: relative;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,245,255,0.1);
+  }
+
+  /* Gradient overlays top/bottom */
+  .reel-window::before, .reel-window::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 60px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .reel-window::before {
+    top: 0;
+    background: linear-gradient(to bottom, #04040c 0%, transparent 100%);
+  }
+  .reel-window::after {
+    bottom: 0;
+    background: linear-gradient(to top, #04040c 0%, transparent 100%);
+  }
+
+  /* Center line highlight */
+  .reel-center-line {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 56px;
+    background: rgba(255,230,0,0.04);
+    border-top: 1px solid rgba(255,230,0,0.25);
+    border-bottom: 1px solid rgba(255,230,0,0.25);
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .reel-center-line::before,
+  .reel-center-line::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--neon-yellow);
+    font-size: 12px;
+    text-shadow: var(--glow-yellow);
+  }
+  .reel-center-line::before { left: 10px; }
+  .reel-center-line::after  { right: 10px; content: '◀'; }
+
+  /* THE REEL STRIP */
+  .reel-strip {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    transition: none;
+  }
+
+  .reel-item {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+    text-align: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .reel-item-inner {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(11px, 2.5vw, 14px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color 0.1s;
+  }
+
+  .reel-item.selected .reel-item-inner {
+    color: var(--neon-yellow);
+    text-shadow: var(--glow-yellow);
+    font-size: clamp(12px, 3vw, 16px);
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .btn-spin {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    padding: 14px 28px;
+    background: transparent;
+    border: 2px solid var(--neon-pink);
+    color: var(--neon-pink);
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--glow-pink);
+    box-shadow: var(--glow-pink);
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-spin:hover:not(:disabled) {
+    background: rgba(255,45,120,0.15);
+    box-shadow: 0 0 20px #ff2d78, 0 0 50px #ff2d7833;
+    transform: translateY(-1px);
+  }
+
+  .btn-spin:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
+  }
+
+  .btn-spin:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-spin::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+
+  .btn-spin:hover:not(:disabled)::before {
+    transform: translateX(100%);
+  }
+
+  .coin-count {
+    font-size: 9px;
+    color: var(--neon-yellow);
+    text-shadow: var(--glow-yellow);
+    letter-spacing: 2px;
+  }
+
+  /* RESULT BANNER */
+  .result-banner {
+    width: 100%;
+    text-align: center;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+
+  .result-banner.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .result-label {
+    font-size: 7px;
+    color: var(--neon-cyan);
+    letter-spacing: 4px;
+    text-shadow: var(--glow-cyan);
+  }
+
+  .result-game {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(14px, 4vw, 20px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 10px #ffe600, 0 0 30px #ffe60066;
+    animation: pulse-result 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-result {
+    0%,100%{ text-shadow: 0 0 8px #ffe600, 0 0 20px #ffe60055; }
+    50%{ text-shadow: 0 0 16px #ffe600, 0 0 40px #ffe600aa; }
+  }
+
+  /* GAME LIST EDITOR */
+  .editor-toggle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid rgba(0,245,255,0.3);
+    color: rgba(0,245,255,0.6);
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .editor-toggle:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    text-shadow: var(--glow-cyan);
+  }
+
+  .editor-panel {
+    width: 100%;
+    background: var(--dark2);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 10px;
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .editor-panel.open {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform: translateY(-6px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .editor-header {
+    font-size: 8px;
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
+    text-shadow: var(--glow-cyan);
+    border-bottom: 1px solid rgba(0,245,255,0.15);
+    padding-bottom: 10px;
+  }
+
+  .game-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .game-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,245,255,0.06);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .game-tag .remove-btn {
+    background: none;
+    border: none;
+    color: var(--neon-pink);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 2px;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+
+  .game-tag .remove-btn:hover { opacity: 1; }
+
+  .add-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .add-input {
+    flex: 1;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0,245,255,0.25);
+    border-radius: 4px;
+    padding: 9px 12px;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(0,245,255,0.15);
+  }
+
+  .add-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 9px 14px;
+    background: rgba(0,245,255,0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .add-btn:hover {
+    background: rgba(0,245,255,0.2);
+    text-shadow: var(--glow-cyan);
+  }
+
+  /* PARTICLES */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: particle-fall linear forwards;
+  }
+
+  @keyframes particle-fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity:1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity:0; }
+  }
+
+  /* corner decorations */
+  .corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--neon-cyan);
+    border-style: solid;
+    opacity: 0.4;
+  }
+  .corner.tl { top:8px; left:8px; border-width:2px 0 0 2px; }
+  .corner.tr { top:8px; right:8px; border-width:2px 2px 0 0; }
+  .corner.bl { bottom:8px; left:8px; border-width:0 0 2px 2px; }
+  .corner.br { bottom:8px; right:8px; border-width:0 2px 2px 0; }
+
+  /* Credits footer */
+  .footer {
+    font-size: 6px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 2px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <div class="title-top">INSERT COIN TO CONTINUE</div>
+    <div class="title-main">GAME PICKER<br>9000</div>
+    <div class="title-sub">▸ TONIGHT'S GAME SELECTOR ◂</div>
+  </div>
+
+  <!-- CABINET -->
+  <div class="cabinet">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="cabinet-label">— SLOT REEL —</div>
+
+    <div class="reel-window" id="reelWindow">
+      <div class="reel-center-line"></div>
+      <div class="reel-strip" id="reelStrip"></div>
+    </div>
+
+    <div class="controls">
+      <div class="coin-count" id="coinDisplay">CREDITS: 3</div>
+      <button class="btn-spin" id="spinBtn" onclick="spin()">▶ SPIN ◀</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-banner" id="resultBanner">
+    <div class="result-label">TONIGHT YOU SHALL PLAY</div>
+    <div class="result-game" id="resultGame"></div>
+  </div>
+
+  <!-- EDITOR TOGGLE -->
+  <button class="editor-toggle" onclick="toggleEditor()">⚙ EDIT GAME LIST</button>
+
+  <div class="editor-panel" id="editorPanel">
+    <div class="editor-header">▸ GAME LIST EDITOR</div>
+    <div class="game-tags" id="gameTags"></div>
+    <div class="add-row">
+      <input class="add-input" id="addInput" type="text" placeholder="Add a game..." maxlength="40"
+        onkeydown="if(event.key==='Enter')addGame()">
+      <button class="add-btn" onclick="addGame()">+ ADD</button>
+    </div>
+  </div>
+
+  <div class="footer">© GAME PICKER 9000 · INSERT MORE COINS</div>
+
+</div>
+
+<script>
+const COLORS = [
+  '#00f5ff','#ff2d78','#ffe600','#39ff14','#bf5fff',
+  '#ff8c00','#00e5ff','#ff4fcf','#a8ff00','#ff6b6b'
+];
+
+let games = [
+  "SC2",
+  "Heroes",
+  "OW",
+  "BF6",
+  "EFK",
+  "EFK Arena",
+  "Forza"
+];
+
+let credits = 3;
+let spinning = false;
+let selectedGame = null;
+
+const ITEM_H = 56;
+
+function buildReel(items) {
+  const strip = document.getElementById('reelStrip');
+  strip.innerHTML = '';
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+  items.forEach((game, i) => {
+    const div = document.createElement('div');
+    div.className = 'reel-item';
+    const inner = document.createElement('div');
+    inner.className = 'reel-item-inner';
+    inner.style.color = COLORS[i % COLORS.length];
+    inner.style.textShadow = `0 0 8px ${COLORS[i % COLORS.length]}88`;
+    inner.textContent = game;
+    div.appendChild(inner);
+    strip.appendChild(div);
+  });
+  return strip;
+}
+
+function getWindowCenter() {
+  return document.getElementById('reelWindow').offsetHeight / 2;
+}
+
+function spin() {
+  if (spinning || games.length < 2) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  credits = Math.max(0, credits - 1);
+  updateCredits();
+
+  // Hide result
+  const banner = document.getElementById('resultBanner');
+  banner.classList.remove('show');
+
+  // Pick target index
+  const targetIndex = Math.floor(Math.random() * games.length);
+
+  // Build a long reel: several full loops + landing on target
+  const loops = 4 + Math.floor(Math.random() * 3);
+  const spinItems = [];
+  const totalSpins = loops * games.length;
+  for (let i = 0; i < totalSpins; i++) {
+    spinItems.push(games[i % games.length]);
+  }
+  // Append games until we land on target
+  // We want index (spinItems.length + offset) where offset lands target in center
+  spinItems.push(...games);
+  // find last occurrence >= totalSpins that is targetIndex
+  let finalIndex = totalSpins + targetIndex;
+  spinItems.length = finalIndex + 1; // trim
+  // pad if needed
+  while (spinItems.length <= finalIndex) spinItems.push(games[spinItems.length % games.length]);
+
+  // Add a few extras after for visual
+  const extraAfter = 3;
+  for (let i = 1; i <= extraAfter; i++) {
+    spinItems.push(games[(targetIndex + i) % games.length]);
+  }
+
+  buildReel(spinItems);
+  const strip = document.getElementById('reelStrip');
+
+  const windowCenter = getWindowCenter();
+  const finalTranslate = -(finalIndex * ITEM_H - windowCenter + ITEM_H / 2);
+
+  // Animate in phases
+  // Phase 1: fast spin
+  const duration = 2200 + Math.random() * 600;
+  const overshoot = ITEM_H * 0.35;
+
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      strip.style.transition = `transform ${duration}ms cubic-bezier(0.15, 0.85, 0.35, 1.0)`;
+      strip.style.transform = `translateY(${finalTranslate - overshoot}px)`;
+
+      setTimeout(() => {
+        // Bounce settle
+        strip.style.transition = 'transform 160ms cubic-bezier(0.4, 0, 0.2, 1)';
+        strip.style.transform = `translateY(${finalTranslate + overshoot * 0.35}px)`;
+
+        setTimeout(() => {
+          strip.style.transition = 'transform 120ms ease-out';
+          strip.style.transform = `translateY(${finalTranslate}px)`;
+
+          setTimeout(() => {
+            onLanded(targetIndex, games[targetIndex], spinItems, finalIndex);
+          }, 150);
+        }, 170);
+      }, duration);
+    });
+  });
+}
+
+function onLanded(targetIndex, gameName, spinItems, finalIndex) {
+  // Highlight landed item
+  const items = document.querySelectorAll('.reel-item');
+  items.forEach((el, i) => el.classList.remove('selected'));
+  if (items[finalIndex]) items[finalIndex].classList.add('selected');
+
+  selectedGame = gameName;
+
+  // Show result
+  document.getElementById('resultGame').textContent = gameName;
+  const banner = document.getElementById('resultBanner');
+  setTimeout(() => banner.classList.add('show'), 100);
+
+  // Particles
+  spawnParticles();
+
+  spinning = false;
+  document.getElementById('spinBtn').disabled = false;
+
+  if (credits <= 0) {
+    credits = 3;
+    updateCredits();
+  }
+}
+
+function updateCredits() {
+  document.getElementById('coinDisplay').textContent = `CREDITS: ${credits}`;
+}
+
+function spawnParticles() {
+  const container = document.getElementById('particles');
+  const colors = ['#ffe600','#ff2d78','#00f5ff','#39ff14','#bf5fff'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = (10 + Math.random() * 80) + 'vw';
+    p.style.top = (10 + Math.random() * 30) + 'vh';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = (4 + Math.random() * 8) + 'px';
+    p.style.height = p.style.width;
+    p.style.animationDuration = (0.8 + Math.random() * 1.4) + 's';
+    p.style.animationDelay = (Math.random() * 0.4) + 's';
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    container.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+  }
+}
+
+// ---- EDITOR ----
+function toggleEditor() {
+  const panel = document.getElementById('editorPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) renderTags();
+}
+
+function renderTags() {
+  const container = document.getElementById('gameTags');
+  container.innerHTML = '';
+  games.forEach((g, i) => {
+    const tag = document.createElement('div');
+    tag.className = 'game-tag';
+    tag.innerHTML = `<span>${g}</span><button class="remove-btn" onclick="removeGame(${i})" title="Remove">×</button>`;
+    container.appendChild(tag);
+  });
+}
+
+function removeGame(i) {
+  if (games.length <= 2) return;
+  games.splice(i, 1);
+  renderTags();
+}
+
+function addGame() {
+  const input = document.getElementById('addInput');
+  const val = input.value.trim();
+  if (!val || games.includes(val)) { input.value = ''; return; }
+  games.push(val);
+  input.value = '';
+  renderTags();
+}
+
+// Init
+buildReel(games);
+const strip = document.getElementById('reelStrip');
+const windowCenter = getWindowCenter();
+// Center on first item
+strip.style.transform = `translateY(${windowCenter - ITEM_H / 2}px)`;
+</script>
+</body>
+</html>
