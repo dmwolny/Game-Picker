@@ -893,7 +893,7 @@ spin = (function() {
     let finalIndex = totalSpins + targetIndex;
     spinItems.length = finalIndex + 1;
     while (spinItems.length <= finalIndex) spinItems.push(games[spinItems.length % games.length]);
-    const extraAfter = 3;
+    const extraAfter = 4;
     for (let i = 1; i <= extraAfter; i++) spinItems.push(games[(targetIndex + i) % games.length]);
     buildReel(spinItems);
     const strip = document.getElementById('reelStrip');
