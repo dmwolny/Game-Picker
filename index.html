@@ -579,13 +579,13 @@ const COLORS = [
 ];
 
 let games = [
-"EFK",
-"EFK Arena",
-"SC2",
-"OW",
-"Heroes",
-"BF6",
-"Forza"
+  "EFK",
+  "EFK Arena",
+  "SC2",
+  "OW",
+  "Heroes",
+  "BF6",
+  "Forza"
 ];
 
 let credits = 3;
@@ -639,8 +639,10 @@ function onLanded(targetIndex, gameName, spinItems, finalIndex) {
   document.getElementById('spinBtn').disabled = false;
 
   if (credits <= 0) {
-    credits = 3;
-    updateCredits();
+    setTimeout(() => {
+      credits = 3;
+      updateCredits();
+    }, 2000);
   }
 }
 
@@ -878,7 +880,11 @@ spin = (function() {
     updateCredits();
     const banner = document.getElementById('resultBanner');
     banner.classList.remove('show');
-    const targetIndex = Math.floor(Math.random() * games.length);
+    const forceBreak = credits === 0;
+    if (forceBreak && !games.includes('Physical break')) games.push('Physical break');
+    const eligibleGames = forceBreak ? games : games.filter(g => g !== 'Physical break');
+    const targetName = forceBreak ? 'Physical break' : eligibleGames[Math.floor(Math.random() * eligibleGames.length)];
+    const targetIndex = games.indexOf(targetName);
     const loops = 4 + Math.floor(Math.random() * 3);
     const spinItems = [];
     const totalSpins = loops * games.length;
